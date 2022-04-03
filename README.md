@@ -1,9 +1,12 @@
 # wheel-dialog
+### 组件介绍
 原生js实现Dialog组件，实现点击button，实现弹窗自定义，并且完成自定义事件option
 
 预览链接：https://haxiedaimala.github.io/wheel-UI/Dialog/index.html
-代码链接：
 
+代码链接：https://github.com/haxiedaimala/wheel-UI/tree/main/Dialog
+
+### 组件过程
 1. 设置基础结构
 2. 设置样式
   - 将`<div class="diolag">`设置为蒙版，可以用固定定位加top left、right、bottom都各自为0，可以使蒙版铺满整个视窗。由于点击按钮才会出现，原本应该隐藏，之后再显示出来，为了到达一个过渡效果，可以添加`transition`属性，并且设置`opacity`由0到1的过渡
