@@ -62,5 +62,22 @@ https://github.com/haxiedaimala/wheel-UI/tree/main/Carousel
         - 左按钮需要从左往右过渡，且透明0->1,因此左按钮原先位置，需要靠左一点
         - 右按钮需要从右往左过渡，且透明度0->1，因此右按钮原先位置，需要靠右一点
       - 当鼠标经过`panel`面板，添加`hover`后arrows显示，给左右按钮分别设置显示后的样式
+      
+     3. `indicators`样式设置
+      - `ul`采用绝对定位
+      - 为了使用户点击效果体验感好，给`li`设置padding属性，`li`添加伪元素，显示轮播图的`li`点
+      - 给显示当前索引的indicator添加`active`类
 
 3. 实现js
+实现目标：
+点击pre按钮，显示上一页panel，设置indicators
+点击next按钮，显示下一页panel，设置indicators
+点击indicators，获取第n页panel，设置indicators
+
+    1. 设置获取当前indicator的索引函数getIndex，根据当前indicators类数组对象（需要转为数组）中拥有active的元素获取索引值
+    2. 设置获取上一个索引的函数getPreIndex
+    3. 设置获取下一个索引的函数getNextIndex
+    4. 设置显示当前索引的panel函数：setPage
+    5. 设置显示当前索引的indicator函数：setindicator
+    6. 给左右按钮分别绑定点击事件，执行函数分别是获取点击后的索引，调用setPage和setindicator函数
+    7. 给indicators里的li绑定点击事件，执行函数是，根据点击的li获取索引，调用setPage和setindicator函数
