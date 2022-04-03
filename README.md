@@ -51,12 +51,12 @@ https://github.com/haxiedaimala/wheel-UI/tree/main/Carousel
   - 设置`indicators`轮播点的切换结构，给显示的`indicator`添加`active`类
   
 2. 实现基本css样式
-  1. `panel`的`a`链接
+    1. `panel`的`a`链接
       - 100%铺满整个轮播carousel结构
       - 给元素设置切换前的样式，由于切换需要有一个由透明到显示过渡效果，因此添加`transition`属性
       - 后续需要通过`js`操控真正轮播显示`panel`，因此给显示的`panel a`设置`.active`显示后的样式
       
-  2. `arrows`左右按钮样式
+    2. `arrows`左右按钮样式
       - 左右按钮采用绝对定位，使其定位到相应的左中、右中的位置
       - 有一个过渡的效果，需要添加`transition`属性，并且设置过渡前的效果
         - 左按钮需要从左往右过渡，且透明0->1,因此左按钮原先位置，需要靠左一点
