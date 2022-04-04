@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 10px 16px;
+            border-radius: 5px;
+            box-shadow: 0 0 4px 0 rgba(0, 0, 0, .3);
+        }
+        
+        .carousel {
+            position: relative;
+            height: 200px;
+        }
+        
+        .carousel .panels>a {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            opacity: 0;
+            transition: all .3s;
+        }
+        
+        .carousel .panels>a:nth-child(even) {
+            background-color: lightblue;
+        }
+        
+        .carousel .panels>a:nth-child(odd) {
+            background-color: lightgreen;
+        }
+        
+        .carousel .panels>a.active {
+            z-index: 1;
+            opacity: 1;
+        }
+        
+        .carousel .arrow {
+            position: absolute;
+            top: 50%;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(31, 45, 61, .11);
+            opacity: 0;
+            transition: all .3s;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .carousel .arrow-pre {
+            left: 10px;
+            transform: translate(-10px, -50%);
+        }
+        
+        .carousel:hover .arrow-pre {
+            opacity: 1;
+            transform: translate(0, -50%);
+        }
+        
+        .carousel .arrow::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            transform: rotate(-45deg);
+        }
+        
+        .carousel .arrow-next {
+            right: 10px;
+            transform: translate(10px, -50%);
+        }
+        
+        .carousel:hover .arrow-next {
+            opacity: 1;
+            transform: translate(0, -50%);
+        }
+        
+        .carousel .arrow-next::after {
+            transform: rotate(135deg);
+        }
+        
+        .carousel .indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            z-index: 100;
+            transform: translate(-50%, 0);
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .carousel .indicators>li {
+            display: inline-block;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+        
+        .carousel .indicators>li:after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 2px;
+            border-radius: 2px;
+            background-color: #c0c4cc;
+            transition: all .3s;
+        }
+        
+        .indicators>li.active:after {
+            background-color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Carousel</h2>
+        <div class="carousel">
+            <div class="panels">
+                <a href="#0" class="active">0</a>
+                <a href="#1">1</a>
+                <a href="#2">2</a>
+                <a href="#3">3</a>
+            </div>
+            <div class="arrows">
+                <button class="arrow arrow-pre"></button>
+                <button class="arrow arrow-next"></button>
+            </div>
+            <ul class="indicators">
+                <li class="active"></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        /*
+        点击上pre，获取上一页的panel，设置indicators
+        点击下next，获取下一页的panel，设置indicators
+        点击indicators，获取第n页panel，设置indicators
+
+        */
+
+        const $ = s => document.querySelector(s)
+        const $$ = s => document.querySelectorAll(s)
+
+        const $pre = $('.carousel .arrow-pre')
+        const $next = $('.carousel .arrow-next')
+        const $$panels = $$('.carousel .panels>a')
+        const $$indicators = $$('.carousel .indicators>li')
+
+        // 获取当前的indicator的索引
+        // 获取当前带有active类的元素，不可以提前定义提取，因为需要动态不断的获取新的 
+        const getIndex = () => [...$$indicators].indexOf($('.carousel .indicators>li.active'))
+            // 获取当前的indicator的上一个索引
+        const getPreIndex = () => (getIndex() - 1 + $$indicators.length) % $$indicators.length
+            // 获取当前的indicator的下一个索引
+        const getNextIndex = () => (getIndex() + 1 + $$indicators.length) % $$indicators.length
+            // 设置当前索引panel的显示，与其他索引panel的消失
+        const setPage = index => {
+                $$panels.forEach($panel => $panel.classList.remove('active'))
+                $$panels[index].classList.add('active')
+            }
+            // 设置当前索引indic的显示，与其他索引indicator的消失
+        const setindicator = index => {
+                $$indicators.forEach($indicator => $indicator.classList.remove('active'))
+                $$indicators[index].classList.add('active')
+            }
+            // 点击上一个按钮，让上一个索引panel轮播，并且让indicator轮播到正常索引
+        $pre.onclick = function() {
+                let index = getPreIndex()
+                setPage(index)
+                setindicator(index)
+            }
+            // 点击下一个按钮，让下一个索引panel轮播，并且让indicator轮播到正常索引
+        $next.onclick = function() {
+                let index = getNextIndex()
+                setPage(index)
+                setindicator(index)
+            }
+            // 点击indicators，获取点击的索引，并且让该索引的panel indicator都正确显示，其他都隐藏
+        $$indicators.forEach($indicator => $indicator.onclick = function() {
+            // 获取当前点击的索引，由于$$indicators是元素集合。类数组对象，不是数组，因此需要先转成数组，才能够使用相关数据的方法
+            let index = [...$$indicators].indexOf(this)
+            setPage(index)
+            setindicator(index)
+        })
+    </script>
+
+</body>
+
+</html>

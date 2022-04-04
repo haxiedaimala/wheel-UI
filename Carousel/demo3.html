@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 10px 16px;
+            border-radius: 5px;
+            box-shadow: 0 0 4px 0 rgba(0, 0, 0, .3);
+        }
+        
+        .animation-select select {
+            right: 0;
+            padding: 10px 16px;
+            font-size: 15px;
+            border: none;
+            outline: none;
+        }
+        
+        .carousel {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .carousel .panels>a {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            z-index: 1;
+            /* 删除透明度，因为轮播需要一直显示 */
+            /* opacity: 0; */
+            /* transition: all .3s; */
+        }
+        
+        .carousel .panels>a.active {
+            z-index: 10;
+        }
+        
+        .carousel .panels>a:nth-child(even) {
+            background-color: lightblue;
+        }
+        
+        .carousel .panels>a:nth-child(odd) {
+            background-color: lightgreen;
+        }
+        
+        .carousel .arrow {
+            position: absolute;
+            top: 50%;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(31, 45, 61, .11);
+            opacity: 0;
+            transition: all .3s;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .carousel .arrow-pre {
+            left: 10px;
+            transform: translate(-10px, -50%);
+        }
+        
+        .carousel:hover .arrow-pre {
+            opacity: 1;
+            transform: translate(0, -50%);
+        }
+        
+        .carousel .arrow::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            transform: rotate(-45deg);
+        }
+        
+        .carousel .arrow-next {
+            right: 10px;
+            transform: translate(10px, -50%);
+        }
+        
+        .carousel:hover .arrow-next {
+            opacity: 1;
+            transform: translate(0, -50%);
+        }
+        
+        .carousel .arrow-next::after {
+            transform: rotate(135deg);
+        }
+        
+        .carousel .indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            z-index: 100;
+            transform: translate(-50%, 0);
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .carousel .indicators>li {
+            display: inline-block;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+        
+        .carousel .indicators>li:after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 2px;
+            border-radius: 2px;
+            background-color: #c0c4cc;
+            transition: all .3s;
+        }
+        
+        .indicators>li.active:after {
+            background-color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Carousel</h2>
+        <div class="animation-select">
+            <select id="animation-select">
+                <option value="slide" selected>slide</option>
+                <option value="fade">fade</option>
+                <option value="zoom">zoom</option>
+            </select>
+        </div>
+        <div class="carousel">
+            <div class="panels">
+                <a href="#0" class="active">0</a>
+                <a href="#1">1</a>
+                <a href="#2">2</a>
+                <a href="#3">3</a>
+            </div>
+            <div class="arrows">
+                <button class="arrow arrow-pre"></button>
+                <button class="arrow arrow-next"></button>
+            </div>
+            <ul class="indicators">
+                <li class="active"></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <h2>Carousel</h2>
+        <div class="animation-select">
+            <select id="animation-select">
+                <option value="slide" selected>slide</option>
+                <option value="fade">fade</option>
+                <option value="zoom">zoom</option>
+            </select>
+        </div>
+        <div class="carousel">
+            <div class="panels">
+                <a href="#0" class="active">0</a>
+                <a href="#1">1</a>
+                <a href="#2">2</a>
+                <a href="#3">3</a>
+            </div>
+            <div class="arrows">
+                <button class="arrow arrow-pre"></button>
+                <button class="arrow arrow-next"></button>
+            </div>
+            <ul class="indicators">
+                <li class="active"></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+
+
+
+    <script>
+        // 点击上pre，获取上一页的panel，设置indicators
+        // 点击下next，获取下一页的panel，设置indicators
+        // 点击indicators，获取第n页panel，设置indicators
+
+
+        // 每次切换都对两个元素的css操作（不只是一个css样式），因此可以提前封装一个给元素添加css的函数
+        const css = ($node, cssObj) => Object.assign($node.style, cssObj)
+
+
+        // pannel切换动画的对象
+        const Animation = {
+            // 左右切换动画
+            slide($from, $to, direction) {
+
+                // 每次执行前，将两个元素的style重置
+                $from.style = ''
+                $to.style = ''
+
+                // if (direction === 'left') {
+                //     // 切换前的效果
+                //     css($from, {
+                //         transform: `translateX(0)`,
+                //         // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //         zIndex: 10
+                //     })
+                //     css($to, {
+                //         transform: `translateX(100%)`,
+                //         // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //         zIndex: 10
+                //     })
+
+                //     // 切换后的效果，因为js会将连续的动作一起执行，因此切换前后需要有一个过渡效果，则设置延迟
+                //     setTimeout(() => {
+                //         css($from, {
+                //             transform: `translateX(-100%)`,
+                //             // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //             zIndex: 10,
+                //             transition: `all .4s`,
+                //         })
+                //         css($to, {
+                //             transform: `translateX(0)`,
+                //             // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //             zIndex: 10,
+                //             transition: `all .4s`,
+                //         })
+                //     })
+                // } else if (direction === 'right') {
+                //     // 切换前的效果
+                //     css($from, {
+                //         transform: `translateX(0)`,
+                //         // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //         zIndex: 10
+                //     })
+                //     css($to, {
+                //         transform: `translateX(-100%)`,
+                //         // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //         zIndex: 10
+                //     })
+
+                //     // 切换后的效果，因为js会将连续的动作一起执行，因此切换前后需要有一个过渡效果，则设置延迟
+                //     setTimeout(() => {
+                //         css($from, {
+                //             transform: `translateX(100%)`,
+                //             // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //             zIndex: 10,
+                //             transition: `all .4s`,
+                //         })
+                //         css($to, {
+                //             transform: `translateX(0)`,
+                //             // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                //             zIndex: 10,
+                //             transition: `all .4s`,
+                //         })
+                //     })
+                // }
+
+                css($from, {
+                    // 由于左右两个方向的动画代码大量重复,因此可以进行代码优化
+                    // 切换前的效果
+                    transform: `translateX(0)`,
+                    // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                    zIndex: 10
+
+                })
+                css($to, {
+                    transform: `translateX(${direction === 'right'?'-':''}100%)`,
+                    // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                    zIndex: 10
+                })
+
+                // 切换后的效果，因为js会将连续的动作一起执行，因此切换前后需要有一个过渡效果，则设置延迟
+                setTimeout(() => {
+                        css($from, {
+                            transform: `translateX(${direction === 'left'?'-':''}100%)`,
+                            // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                            zIndex: 10,
+                            transition: `all .4s`
+
+                        })
+                        css($to, {
+                            transform: `translateX(0)`,
+                            // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                            zIndex: 10,
+                            transition: `all .4s`,
+                        })
+                    })
+                    // 这个时候有可能出现的效果不理想，有空白，可能是原有的CSS样式造成的，需要
+            },
+            // 渐变轮播的切换
+            fade($from, $to) {
+
+                // 每次执行前，将两个元素的style重置
+                $from.style = ''
+                $to.style = ''
+
+                css($from, {
+                    // 由于左右两个方向的动画代码大量重复,因此可以进行代码优化
+                    // 切换前的效果
+                    opacity: 1,
+                    // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                    zIndex: 10
+
+                })
+                css($to, {
+                    opacity: 0,
+                    // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                    zIndex: 9
+                })
+
+                // 切换后的效果，因为js会将连续的动作一起执行，因此切换前后需要有一个过渡效果，则设置延迟
+                setTimeout(() => {
+                        css($from, {
+                            opacity: 0,
+                            // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                            zIndex: 10,
+                            transition: `all .4s`
+
+                        })
+                        css($to, {
+                            opacity: 1,
+                            // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                            zIndex: 9,
+                            transition: `all .4s`,
+                        })
+
+                    })
+                    // 先不要立马是z-index变化，因为要有一个渐变的过程，立即改变，将不会有过渡效果
+                setTimeout(() => {
+                    css($from, {
+                        // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                        zIndex: 9,
+
+                    })
+                    css($to, {
+                        // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                        zIndex: 10,
+                    })
+                }, 400);
+            },
+            // 放大的轮播切换
+            zoom($from, $to) {
+
+                // 每次执行前，将两个元素的style重置
+                $from.style = ''
+                $to.style = ''
+
+                css($from, {
+                    // 由于左右两个方向的动画代码大量重复,因此可以进行代码优化
+                    // 切换前的效果
+                    transform: `scale(1)`,
+                    opacity: 1,
+                    // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                    zIndex: 10
+
+                })
+                css($to, {
+                    transform: `scale(10)`,
+                    opacity: 0,
+                    // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                    zIndex: 9
+                })
+
+                // 切换后的效果，因为js会将连续的动作一起执行，因此切换前后需要有一个过渡效果，则设置延迟
+                setTimeout(() => {
+                        css($from, {
+                            transform: `scale(10)`,
+                            opacity: 0,
+                            // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                            zIndex: 10,
+                            transition: `all .4s`
+
+                        })
+                        css($to, {
+                            transform: `scale(1)`,
+                            opacity: 1,
+                            // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                            zIndex: 9,
+                            transition: `all .4s`,
+                        })
+
+                    })
+                    // 先不要立马是z-index变化，因为要有一个渐变的过程，立即改变，将不会有过渡效果
+                setTimeout(() => {
+                    css($from, {
+                        // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                        zIndex: 9,
+
+                    })
+                    css($to, {
+                        // 因为panel都是定位元素，操作的两个元素需要展示到前面
+                        zIndex: 10,
+                    })
+                }, 400);
+            }
+        }
+
+        class Carousel {
+            constructor($root, animation = 'slide') {
+                this.$root = $root
+                this.$pre = $root.querySelector('.arrow-pre')
+                this.$next = $root.querySelector('.arrow-next')
+                this.$$panels = $root.querySelectorAll('.panels>a')
+                this.$$indicators = $root.querySelectorAll('.indicators>li')
+                    // 动画效果函数
+                this.animation = animation
+
+                this.bind()
+            }
+
+
+            //绑定事件
+            bind() {
+                // 点击上一个按钮，让上一个索引panel轮播，并且让indicator轮播到正常索引
+                this.$pre.onclick = () => {
+                    // 绑定事件的this 发生了改变。三种方法。1.提前将this赋值给self，之后的this都用self替代 2.使用箭头函数 3.将事件函数单独声明出来，这里调用函数，并用.bind(this)改变this指向
+                    // 获取当前元素的索引
+                    let fromIndex = this.getIndex()
+                        // 获取点击后的上一个元素索引值
+                    let toIndex = this.getPreIndex()
+                    this.setPage(fromIndex, toIndex, 'left')
+                    this.setindicator(toIndex)
+                }
+
+
+                // 点击下一个按钮，让下一个索引panel轮播，并且让indicator轮播到正常索引
+                this.$next.onclick = () => {
+                    // 获取当前元素的索引
+                    let fromIndex = this.getIndex()
+                        // 获取点击后的下一个元素索引
+                    let toIndex = this.getNextIndex()
+                    this.setPage(fromIndex, toIndex, 'right')
+                    this.setindicator(toIndex)
+                }
+
+
+                // 点击indicators，获取点击的索引，并且让该索引的panel indicator都正确显示，其他都隐藏
+                this.$$indicators.forEach($indicator => $indicator.onclick = (e) => {
+                    // 获取当前点击的索引，由于$$indicators是元素集合。类数组对象，不是数组，因此需要先转成数组，才能够使用相关数据的方法
+                    let toIndex = [...this.$$indicators].indexOf(e.target)
+                        // 获取当前元素的索引
+                    let fromIndex = this.getIndex()
+                    this.setPage(fromIndex, toIndex, fromIndex > toIndex ? 'right' : 'left')
+                    this.setindicator(toIndex)
+                })
+            }
+
+
+            // 获取当前的indicator的索引
+            // 获取当前带有active类的元素，不可以提前定义提取，因为需要动态不断的获取新的 
+            getIndex() {
+                return [...this.$$indicators].indexOf(this.$root.querySelector('.indicators>li.active'))
+            }
+
+
+            // 获取当前的indicator的上一个索引
+            getPreIndex() {
+                return (this.getIndex() - 1 + this.$$indicators.length) % this.$$indicators.length
+            }
+
+            // 获取当前的indicator的下一个索引
+            getNextIndex() {
+                return (this.getIndex() + 1 + this.$$indicators.length) % this.$$indicators.length
+            }
+
+            // 设置当前索引panel的显示，与其他索引panel的消失
+            // 添加panel的某种动画切换，每种动画切换，都需要两个元素对象，和切换方向
+            setPage(fromIndex, toIndex, direction) {
+                this.animation(this.$$panels[fromIndex], this.$$panels[toIndex], direction)
+            }
+
+            // 设置当前索引indic的显示，与其他索引indicator的消失
+            setindicator(index) {
+                this.$$indicators.forEach($indicator => $indicator.classList.remove('active'))
+                this.$$indicators[index].classList.add('active')
+            }
+
+            setAnimation(animation) {
+                this.animation = animation
+            }
+        }
+
+
+        document.querySelectorAll('.carousel').forEach($carousel => {
+
+            let $select = $carousel.parentNode.querySelector('#animation-select')
+            let animation = $carousel.parentNode.querySelector('option[selected]').value
+            let carousel = new Carousel($carousel, Animation[animation])
+            $select.onchange = function() {
+
+                carousel.setAnimation(Animation[this.value])
+            }
+        })
+    </script>
+
+</body>
+
+</html>
