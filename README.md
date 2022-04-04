@@ -38,8 +38,14 @@
 ### 组件介绍
 使用js原生实现`Carousel`组件，完成轮播效果
 
-预览链接：
+版本1.0：预览链接：
 https://haxiedaimala.github.io/wheel-UI/Carousel/demo1.html
+
+版本2.0：预览链接：
+https://haxiedaimala.github.io/wheel-UI/Carousel/demo2.html
+
+版本3.0（完善版本）：预览链接：
+https://haxiedaimala.github.io/wheel-UI/Carousel/demo3.html
 
 代码链接:
 https://github.com/haxiedaimala/wheel-UI/tree/main/Carousel
@@ -74,6 +80,7 @@ https://github.com/haxiedaimala/wheel-UI/tree/main/Carousel
 点击next按钮，显示下一页panel，设置indicators
 点击indicators，获取第n页panel，设置indicators
 
+版本1.0：
     1. 设置获取当前indicator的索引函数getIndex，根据当前indicators类数组对象（需要转为数组）中拥有active的元素获取索引值
     2. 设置获取上一个索引的函数getPreIndex
     3. 设置获取下一个索引的函数getNextIndex
@@ -81,3 +88,10 @@ https://github.com/haxiedaimala/wheel-UI/tree/main/Carousel
     5. 设置显示当前索引的indicator函数：setindicator
     6. 给左右按钮分别绑定点击事件，执行函数分别是获取点击后的索引，调用setPage和setindicator函数
     7. 给indicators里的li绑定点击事件，执行函数是，根据点击的li获取索引，调用setPage和setindicator函数
+
+
+版本2.0：
+  在版本1 的条件下，用构造函数创建对象实现了组件化代码，后续直接创建对象即可使用轮播
+  
+版本3.0：
+  在版本2 组件化代码的条件下，创建了一个Animation动画对象，实现了不同的轮播效果选择。将组件化代码和动画效果对象两个单独的模块组合，用组合设计模式实现了不同的效果轮播
