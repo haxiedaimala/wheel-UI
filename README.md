@@ -81,6 +81,7 @@ https://github.com/haxiedaimala/wheel-UI/tree/main/Carousel
 点击indicators，获取第n页panel，设置indicators
 
 版本1.0：
+
     1. 设置获取当前indicator的索引函数getIndex，根据当前indicators类数组对象（需要转为数组）中拥有active的元素获取索引值
     2. 设置获取上一个索引的函数getPreIndex
     3. 设置获取下一个索引的函数getNextIndex
